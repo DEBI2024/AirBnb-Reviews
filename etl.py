@@ -18,9 +18,9 @@ CITIES = ["london", "nyc"]
 
 cities_reviews = {
     "nyc": "https://data.insideairbnb.com/united-states/" \
-    "ny/new-york-city/2024-07-05/data/reviews.csv.gz",
+        "ny/new-york-city/2024-07-05/data/reviews.csv.gz",
     "london": "https://data.insideairbnb.com/united-kingdom/" \
-    "england/london/2024-06-14/data/reviews.csv.gz"
+        "england/london/2024-06-14/data/reviews.csv.gz"
 }
 
 cities_listings = {
@@ -141,7 +141,7 @@ def main(is_dataset_new):
 
     for file in csv_files_names:
         os.remove(file)
-    
+
     if is_dataset_new:
         api.dataset_create_new(folder="./dataset")
     else:
