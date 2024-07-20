@@ -143,6 +143,6 @@ def main(is_dataset_new):
         os.remove(file)
     
     if is_dataset_new:
-        api.dataset_create_new(folder="./dataset", convert_to_csv=True)
+        api.dataset_create_new(folder="./dataset")
     else:
-        api.dataset_create_version(folder="./dataset", version_notes="update", convert_to_csv=True)
+        api.dataset_create_version(folder="./dataset", version_notes="update")
