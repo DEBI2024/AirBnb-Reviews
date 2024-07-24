@@ -11,10 +11,18 @@ import shutil
 import glob
 import wget
 import pandas as pd
+import scipy.sparse.linalg
 from sklearn.model_selection import train_test_split
 from kaggle.api.kaggle_api_extended import KaggleApi
 
 CITIES = ["london", "nyc"]
+COLUMNS = ['id', 'listing_url', 'scrape_id', 'last_scraped', 'name',
+       'neighborhood_overview', 'host_id', 'number_of_reviews',
+       'number_of_reviews_ltm', 'number_of_reviews_l30d', 'first_review',
+       'last_review', 'review_scores_rating', 'review_scores_accuracy',
+       'review_scores_cleanliness', 'review_scores_checkin',
+       'review_scores_communication', 'review_scores_location',
+       'review_scores_value', 'calculated_host_listings_count','reviews_per_month']
 
 cities_reviews = {
     "nyc": "https://data.insideairbnb.com/united-states/" \
@@ -110,7 +118,7 @@ def split_data(csv_files_names: list):
         city_reviews_path = [
             x for x in csv_files_names if x.startswith("reviews") and city in x][0]
 
-        city_listings = pd.read_csv(city_listings_path)
+        city_listings = pd.read_csv(city_listings_path)[COLUMNS]
         city_reviews = pd.read_csv(city_reviews_path)
 
         # add city name to help when merginig different cities in the future
