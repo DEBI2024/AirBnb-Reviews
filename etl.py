@@ -106,22 +106,23 @@ def save_data(data: str, path: str):
     data.to_csv(path)
 
 
-def calculate_scores(data: pd.DataFrame)-> pd.DataFame:
-  """calculate the scores of the comments using textblob
-  Args:
-    data: contains the comments needed to calculate the score
-  Returns:
-    data: same object after adding the needed columns"""
-  
+def calculate_scores(data: pd.DataFrame):
+  """calculate the scores of the comments using textblob"""
   subjectivity = []
   polarity = []
   for comment in data.comments.astype(str):
       blob = TextBlob(comment)
       subjectivity.append(blob.sentiment.subjectivity)
       polarity.append(blob.sentiment.polarity)
-  
+
   data["subjectivity"] = subjectivity
   data["polarity"] = polarity
+
+  data = data[data.subjectivity >= 0.75]
+  data.loc[data.polarity < 0, "polarity_class"] = 0
+  data.loc[data.polarity > 0.2, "polarity_class"] = 1
+
+  data = data.dropna(subset = "polarity_class")
   
   return data
 
@@ -143,11 +144,11 @@ def split_data(csv_files_names: list):
     # add city name to help when merginig different cities in the future
     city_listings["city"] = city
     data_city = city_listings.rename({"id": "listing_id"}, axis = 1).merge(city_reviews, on = "listing_id", how = "inner")
-    
+
     data_city = calculate_scores(data_city)
 
     # divide the data into 80% training and 20% testing datasets
-    train, test = train_test_split(data_city, test_size=0.2, shuffle = True)
+    train, test = train_test_split(data_city, test_size=0.2, shuffle = True, stratify = data_city["polarity_class"])
 
     save_data(train, f"./dataset/{city}_train.csv")
     save_data(test, f"./dataset/{city}_test.csv")
