@@ -159,7 +159,7 @@ def split_data(csv_files_names: list):
     del test
 
 
-def main(is_dataset_new):
+def main(is_dataset_new, upload):
     """executing etl steps"""
     api = KaggleApi()
     api.authenticate()
@@ -171,7 +171,8 @@ def main(is_dataset_new):
     for file in csv_files_names:
         os.remove(file)
 
-    if is_dataset_new:
-        api.dataset_create_new(folder="./dataset")
-    else:
-        api.dataset_create_version(folder="./dataset", version_notes="update")
+    if upload:
+        if is_dataset_new:
+            api.dataset_create_new(folder="./dataset")
+        else:
+            api.dataset_create_version(folder="./dataset", version_notes="update")
