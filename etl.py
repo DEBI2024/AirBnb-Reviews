@@ -10,11 +10,13 @@ import gzip
 import shutil
 import glob
 import wget
+from bs4 import BeautifulSoup
 import pandas as pd
 import scipy.sparse.linalg
+from tqdm.notebook import tqdm
 from sklearn.model_selection import train_test_split
 from kaggle.api.kaggle_api_extended import KaggleApi
-from textblob import TextBlob
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
 CITIES = ["london", "nyc"]
@@ -106,21 +108,30 @@ def save_data(data: str, path: str):
     data.to_csv(path, index = False)
 
 
+def remove_html_tags(data):
+  """remove html tags from comments in the dataframe"""
+
+  data["comments"] = data.comments.astype(str)
+  data["comments"].apply(lambda x: BeautifulSoup(x, 'html.parser').get_text())
+
+  return data
+
+
 def calculate_scores(data: pd.DataFrame):
   """calculate the scores of the comments using textblob"""
   subjectivity = []
   polarity = []
-  for comment in data.comments.astype(str):
-      blob = TextBlob(comment)
-      subjectivity.append(blob.sentiment.subjectivity)
-      polarity.append(blob.sentiment.polarity)
+  data = remove_html_tags(data)
 
-  data["subjectivity"] = subjectivity
+  analyzer = SentimentIntensityAnalyzer()
+  for comment in tqdm(data.comments.astype(str)):
+      vs = analyzer.polarity_scores(comment)
+      polarity.append(vs["compound"])
+
   data["polarity"] = polarity
 
-  data = data[data.subjectivity >= 0.75]
-  data.loc[data.polarity < 0, "polarity_class"] = 0
-  data.loc[data.polarity > 0.2, "polarity_class"] = 1
+  data.loc[data.polarity <= -0.05, "polarity_class"] = 0
+  data.loc[data.polarity >= 0.05, "polarity_class"] = 1
 
   data = data.dropna(subset = "polarity_class")
   
