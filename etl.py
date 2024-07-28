@@ -103,7 +103,7 @@ def get_file_names():
 
 def save_data(data: str, path: str):
     """save the data to a specific path"""
-    data.to_csv(path)
+    data.to_csv(path, index = False)
 
 
 def calculate_scores(data: pd.DataFrame):
@@ -146,9 +146,11 @@ def split_data(csv_files_names: list):
     data_city = city_listings.rename({"id": "listing_id"}, axis = 1).merge(city_reviews, on = "listing_id", how = "inner")
 
     data_city = calculate_scores(data_city)
+    data_city.comments = data_city.comments.str.replace("\r", " ")
 
     # divide the data into 80% training and 20% testing datasets
     train, test = train_test_split(data_city, test_size=0.2, shuffle = True, stratify = data_city["polarity_class"])
+
 
     save_data(train, f"./dataset/{city}_train.csv")
     save_data(test, f"./dataset/{city}_test.csv")
@@ -159,7 +161,7 @@ def split_data(csv_files_names: list):
     del test
 
 
-def main(is_dataset_new):
+def main(is_dataset_new, upload):
     """executing etl steps"""
     api = KaggleApi()
     api.authenticate()
@@ -171,7 +173,8 @@ def main(is_dataset_new):
     for file in csv_files_names:
         os.remove(file)
 
-    if is_dataset_new:
-        api.dataset_create_new(folder="./dataset")
-    else:
-        api.dataset_create_version(folder="./dataset", version_notes="update")
+    if upload:
+        if is_dataset_new:
+            api.dataset_create_new(folder="./dataset")
+        else:
+            api.dataset_create_version(folder="./dataset", version_notes="update")
