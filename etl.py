@@ -44,17 +44,17 @@ COLUMNS = [
     'reviews_per_month']
 
 cities_reviews = {
-    "nyc": "https://data.insideairbnb.com/united-states/"
-    "ny/new-york-city/2024-07-05/data/reviews.csv.gz",
-    "london": "https://data.insideairbnb.com/united-kingdom/"
-    "england/london/2024-06-14/data/reviews.csv.gz"
+    "nyc": "https://data.insideairbnb.com/united-states/" \
+        "ny/new-york-city/2024-07-05/data/reviews.csv.gz",
+    "london": "https://data.insideairbnb.com/united-kingdom/" \
+        "england/london/2024-06-14/data/reviews.csv.gz"
 }
 
 cities_listings = {
-    "nyc": "https://data.insideairbnb.com/united-states/ny/new-york-city/"
-    "2024-07-05/data/listings.csv.gz",
-    "london": "https://data.insideairbnb.com/united-kingdom/"
-    "england/london/2024-06-14/data/listings.csv.gz"
+    "nyc": "https://data.insideairbnb.com/united-states/ny/new-york-city/" \
+        "2024-07-05/data/listings.csv.gz",
+    "london": "https://data.insideairbnb.com/united-kingdom/" \
+        "england/london/2024-06-14/data/listings.csv.gz"
 }
 
 
