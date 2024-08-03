@@ -16,6 +16,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer # type: ignore
 from tensorflow.keras.preprocessing.sequence import pad_sequences # type: ignore
 from gensim.parsing.preprocessing import remove_stopwords
 from nltk.stem import WordNetLemmatizer
+import nltk
 nltk.download('wordnet')
 
 
