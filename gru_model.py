@@ -89,8 +89,8 @@ def show_learning_curves(history):
     plt.legend()
 
 
-def plot_confusion(pred, y):
-    cm = confusion_matrix(y, pred, labels=[0, 1])
+def plot_confusion(pred, y, normalize = "false"):
+    cm = confusion_matrix(y, pred, labels=[0, 1], normalize = normalize)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
     disp.plot()
     plt.show()
