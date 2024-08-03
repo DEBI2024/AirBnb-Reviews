@@ -14,6 +14,10 @@ import tensorflow.data as tf_data # type: ignore
 from tensorflow import keras # type: ignore
 from tensorflow.keras.preprocessing.text import Tokenizer # type: ignore
 from tensorflow.keras.preprocessing.sequence import pad_sequences # type: ignore
+from gensim.parsing.preprocessing import remove_stopwords
+from nltk.stem import WordNetLemmatizer
+import nltk
+nltk.download('wordnet')
 
 
 def get_glove():
@@ -93,8 +97,16 @@ def pad_data(max_len, tokenized_sequences):
 
     return padded_data
 
+def remove_stop_words(text_list):
 
-def tokenize_data(text_lst, vocab_size=None, tokenizer=None):
+  clean_comments = []
+  for comment in text_list:
+    clean_comment = remove_stopwords(comment)
+    clean_comments.append(clean_comment)
+
+  return clean_comments
+
+def tokenize_data(text_lst, vocab_size=None, tokenizer=None, lemmatize = False):
     """tokenize the raw comments to get index sequences
 
     Args:
@@ -107,11 +119,23 @@ def tokenize_data(text_lst, vocab_size=None, tokenizer=None):
       tokenized_sequences: the tokenized data
       """
 
+    text_comments = text_lst.copy()
+
     if tokenizer is None:
         tokenizer = Tokenizer(num_words=vocab_size)
         tokenizer.fit_on_texts(text_lst)
-
-    tokenized_sequences = tokenizer.texts_to_sequences(text_lst)
+    
+    if lemmatize:
+      lemmatizer = WordNetLemmatizer()
+      lemmatized_sequences = []
+      for sequence in text_lst:
+        sequence_lemma = []
+        for word in sequence:
+          sequence_lemma.append(lemmatizer.lemmatize(word))
+        lemmatized_sequences.append(" ".join(sequence_lemma))
+      text_comments = lemmatized_sequences
+    
+    tokenized_sequences = tokenizer.texts_to_sequences(text_comments)
 
     return tokenizer, tokenized_sequences
 
@@ -164,7 +188,7 @@ def initialize_glove(
     return embedding_matrix
 
 
-def process_data():
+def process_data(remove_stop, lemmatize):
     """apply all preprocessing steps
     Returns:
       train_data_raw: raw training dataframe before filtering
@@ -194,14 +218,23 @@ def process_data():
     balanced_train.comments = balanced_train.comments.astype(str)
     test_data_raw.comments = test_data_raw.comments.astype(str)
 
+    if remove_stop:
+    # remove stop words
+      train_comments = remove_stop_words(balanced_train.comments)
+      test_comments = remove_stop_words(test_data_raw.comments)
+    else:
+      train_comments = balanced_train.comments
+      test_comments = test_data_raw.comments
+
     # tokenizing data
-    tokenizer, tokenized_train = tokenize_data(balanced_train.comments,
+    tokenizer, tokenized_train = tokenize_data(train_comments,
                                                vocab_size=40000,
-                                               tokenizer=None)
+                                               tokenizer=None,
+                                               lemmatize = lemmatize)
 
     _, tokenized_test = tokenize_data(
-        test_data_raw.comments, tokenizer=tokenizer)
-
+        test_comments, tokenizer=tokenizer, lemmatize = lemmatize)
+  
     # padding sequences
     x_train = pad_data(max_len=100, tokenized_sequences=tokenized_train)
     x_test = pad_data(max_len=100, tokenized_sequences=tokenized_test)
@@ -209,7 +242,7 @@ def process_data():
     return train_data_raw, test_data_raw, x_train, x_test, y_train, y_test
 
 
-def main():
+def main(remove_stop = False, lemmatize = False):
     """apply all preprocessing steps"""
 
     path_to_glove = "./glove.6B.100d.txt"
@@ -219,7 +252,7 @@ def main():
 
     embedding_dim = 100
 
-    train_data_raw, _, x_train, x_test, y_train, y_test = process_data()
+    train_data_raw, _, x_train, x_test, y_train, y_test = process_data(remove_stop, lemmatize)
 
     word_index, voc = get_word_index(train_data_raw.comments.astype(str))
     num_tokens = len(voc) + 2
