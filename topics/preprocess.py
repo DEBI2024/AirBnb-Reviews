@@ -21,7 +21,7 @@ nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
 
-DATASET_DIR = os.environ.get('DATASET_DIR', 'data')
+DATASET_DIR = '../dataset/'
 
 def plot_sentiment_dist(df, city):
     plt.figure(figsize=(6, 4))
